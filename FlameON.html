@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FlameON">
+<meta name="theme-color" content="#14171A">
+<title>FlameON — Off-Season Strength &amp; Power</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2314171A'/%3E%3Crect x='16' y='60' width='68' height='10' rx='2' fill='%23E60073'/%3E%3Crect x='24' y='44' width='52' height='10' rx='2' fill='%23E60073' opacity='0.75'/%3E%3Crect x='32' y='28' width='36' height='10' rx='2' fill='%23E60073' opacity='0.5'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2314171A'/%3E%3Crect x='16' y='60' width='68' height='10' rx='2' fill='%23E60073'/%3E%3Crect x='24' y='44' width='52' height='10' rx='2' fill='%23E60073' opacity='0.75'/%3E%3Crect x='32' y='28' width='36' height='10' rx='2' fill='%23E60073' opacity='0.5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14171A;
+    --surface:#1D2125;
+    --surface-2:#262B30;
+    --surface-3:#2F3539;
+    --line:#363C41;
+    --text:#F0EDE6;
+    --text-muted:#93999E;
+    --text-faint:#5E6469;
+    --ember:#E60073;
+    --ember-dim:#B30059;
+    --steel:#4FA3C7;
+    --olive:#8AA06B;
+    --radius:14px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+    font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased;
+    height:100%;}
+  body{padding-bottom:env(safe-area-inset-bottom);}
+  h1,h2,h3,.num{font-family:'Oswald',sans-serif; letter-spacing:0.01em;}
+  .app{max-width:560px;margin:0 auto;min-height:100vh;position:relative;}
+
+  /* Topbar */
+  .topbar{
+    display:flex;align-items:center;gap:14px;
+    padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
+    background:linear-gradient(180deg,#171A1D,rgba(23,26,29,0));
+    position:sticky;top:0;z-index:20;
+  }
+  .nav-btn{
+    width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface-2);display:flex;align-items:center;justify-content:center;
+    flex-shrink:0; cursor:pointer;
+  }
+  .nav-btn span{display:block;width:16px;height:2px;background:var(--text);position:relative;}
+  .nav-btn span::before,.nav-btn span::after{content:'';position:absolute;left:0;width:16px;height:2px;background:var(--text);}
+  .nav-btn span::before{top:-5px;} .nav-btn span::after{top:5px;}
+  .topbar h1{font-size:19px;margin:0;font-weight:600;flex:1;letter-spacing:0.02em;}
+  .topbar h1 b{color:var(--ember);font-weight:700;}
+  .week-pill{
+    font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;color:var(--ember);
+    background:rgba(212,98,43,0.12);border:1px solid rgba(212,98,43,0.35);
+    padding:5px 10px;border-radius:20px;white-space:nowrap;
+  }
+
+  main{padding:4px 18px 60px;}
+  section{display:none;}
+  section.active{display:block;animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* Drawer */
+  .backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:30;opacity:0;pointer-events:none;transition:opacity .25s;}
+  .backdrop.open{opacity:1;pointer-events:auto;}
+  .drawer{
+    position:fixed;top:0;bottom:0;left:0;width:270px;max-width:80%;
+    background:var(--surface);border-right:1px solid var(--line);
+    z-index:40;transform:translateX(-100%);transition:transform .28s cubic-bezier(.2,.8,.2,1);
+    padding:calc(env(safe-area-inset-top) + 20px) 0 20px;overflow-y:auto;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{padding:0 20px 16px;border-bottom:1px solid var(--line);margin-bottom:8px;}
+  .drawer-head .num{font-size:26px;color:var(--text);margin:0;}
+  .drawer-head .num b{color:var(--ember);}
+  .drawer-head p{margin:4px 0 0;font-size:12.5px;color:var(--text-muted);}
+  .drawer-item{
+    display:flex;align-items:center;gap:10px;padding:12px 20px;color:var(--text);
+    font-size:15px;cursor:pointer;border-left:3px solid transparent;
+  }
+  .drawer-item.active{background:var(--surface-2);border-left-color:var(--ember);color:#fff;}
+  .drawer-item .dot{width:6px;height:6px;border-radius:50%;background:var(--text-faint);flex-shrink:0;}
+  .drawer-item.active .dot{background:var(--ember);}
+  .drawer-section-label{padding:16px 20px 6px;font-size:11px;text-transform:uppercase;letter-spacing:0.09em;color:var(--text-faint);}
+
+  /* Cards */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px;margin-bottom:12px;}
+  .hero-card{background:linear-gradient(160deg,var(--surface-2),var(--surface));border:1px solid var(--line);}
+  .hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .hero-phase-label{font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;}
+  .hero-phase-name{font-size:24px;margin:2px 0 0;}
+  .hero-week{font-family:'Oswald';font-size:40px;color:var(--ember);line-height:1;margin-top:6px;}
+  .hero-week span{font-size:16px;color:var(--text-muted);font-family:'Inter';}
+  .badge{display:inline-block;font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:20px;margin-top:8px;}
+  .badge.deload{background:rgba(138,160,107,0.15);color:var(--olive);border:1px solid rgba(138,160,107,0.4);}
+  .badge.contrast{background:rgba(79,163,199,0.15);color:var(--steel);border:1px solid rgba(79,163,199,0.4);}
+  .badge.fixed{background:rgba(212,98,43,0.15);color:var(--ember);border:1px solid rgba(212,98,43,0.4);}
+  .hero-meta{margin-top:12px;font-size:13px;color:var(--text-muted);line-height:1.5;}
+
+  .tabs{display:flex;gap:8px;margin:16px 0 12px;}
+  .tab{flex:1;text-align:center;padding:10px 0;border-radius:10px;border:1px solid var(--line);
+    background:var(--surface-2);color:var(--text-muted);font-weight:600;font-size:14px;cursor:pointer;}
+  .tab.active{background:var(--ember);border-color:var(--ember);color:#1A0D06;}
+
+  .exercise{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:9px;overflow:hidden;}
+  .exercise-head{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;}
+  .order-chip{font-family:'Oswald';font-size:13px;font-weight:600;color:var(--ember);
+    background:rgba(212,98,43,0.12);border-radius:7px;padding:3px 8px;flex-shrink:0;min-width:30px;text-align:center;}
+  .exercise-name{flex:1;font-size:15px;font-weight:500;line-height:1.3;}
+  .exercise-setsreps{font-size:13px;color:var(--text-muted);white-space:nowrap;font-family:'Oswald';}
+  .chevron{width:9px;height:9px;border-right:2px solid var(--text-faint);border-bottom:2px solid var(--text-faint);
+    transform:rotate(45deg);transition:transform .2s;flex-shrink:0;margin:0 2px;}
+  .exercise.open .chevron{transform:rotate(-135deg);}
+  .exercise-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .exercise.open .exercise-body{max-height:300px;}
+  .exercise-body-inner{padding:0 14px 14px;border-top:1px solid var(--line);}
+  .detail-row{display:flex;gap:10px;margin-top:11px;font-size:13.5px;}
+  .detail-label{color:var(--text-faint);width:44px;flex-shrink:0;}
+  .detail-value{color:var(--text);line-height:1.4;}
+  .video-link{display:inline-flex;align-items:center;gap:6px;margin-top:12px;font-size:13px;
+    color:var(--steel);text-decoration:none;border:1px solid rgba(79,163,199,0.35);
+    padding:7px 12px;border-radius:8px;background:rgba(79,163,199,0.08);}
+  .video-link svg{width:12px;height:12px;fill:var(--steel);flex-shrink:0;}
+
+  .section-title{font-size:20px;margin:22px 0 10px;}
+  .section-title:first-child{margin-top:6px;}
+  .sub-label{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-faint);margin:20px 0 8px;}
+
+  p.note{font-size:14px;line-height:1.6;color:var(--text-muted);margin:0 0 14px;}
+  p.note b{color:var(--text);font-weight:600;}
+  ul.rules{margin:0;padding:0;list-style:none;}
+  ul.rules li{font-size:14px;line-height:1.55;color:var(--text-muted);padding:11px 0;border-bottom:1px solid var(--line);}
+  ul.rules li:last-child{border-bottom:none;}
+  ul.rules li b{color:var(--text);font-weight:600;}
+
+  table.overview{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:18px;}
+  table.overview th{text-align:left;color:var(--text-faint);font-weight:500;padding:6px 6px;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:0.04em;font-size:10.5px;}
+  table.overview td{padding:9px 6px;border-bottom:1px solid var(--line);color:var(--text-muted);vertical-align:top;}
+  table.overview td.ph{color:var(--text);font-weight:600;}
+  table.overview tr.current td{background:rgba(212,98,43,0.08);}
+
+  .phase-picker{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+  .phase-chip{flex-shrink:0;padding:8px 14px;border-radius:20px;border:1px solid var(--line);
+    background:var(--surface-2);font-size:13px;color:var(--text-muted);cursor:pointer;white-space:nowrap;}
+  .phase-chip.active{background:var(--ember);border-color:var(--ember);color:#1A0D06;font-weight:600;}
+
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:7px;}
+  .field input[type=date]{
+    width:100%;background:var(--surface-2);border:1px solid var(--line);color:var(--text);
+    padding:12px 12px;border-radius:10px;font-size:15px;font-family:'Inter';
+  }
+  .btn{display:inline-block;background:var(--ember);color:#1A0D06;border:none;border-radius:10px;
+    padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter';}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--text);}
+  .settings-note{font-size:12.5px;color:var(--text-faint);margin-top:8px;line-height:1.5;}
+
+  .day-focus-line{font-size:13px;color:var(--text-muted);margin-bottom:14px;}
+  .warmup-list{list-style:none;padding:0;margin:0;counter-reset:w;}
+  .warmup-list li{counter-increment:w;padding:12px 0 12px 40px;position:relative;border-bottom:1px solid var(--line);font-size:14.5px;color:var(--text);}
+  .warmup-list li:last-child{border-bottom:none;}
+  .warmup-list li::before{content:counter(w);position:absolute;left:0;top:10px;width:26px;height:26px;
+    border-radius:50%;background:var(--surface-3);color:var(--ember);font-family:'Oswald';font-size:13px;font-weight:600;
+    display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <button class="nav-btn" onclick="openMenu()" aria-label="Menu"><span></span></button>
+    <h1><b>FLAME</b>ON</h1>
+    <span class="week-pill" id="weekPill">—</span>
+  </div>
+
+  <div class="backdrop" id="backdrop" onclick="closeMenu()"></div>
+  <nav class="drawer" id="drawer">
+    <div class="drawer-head">
+      <p class="num"><b>FLAME</b>ON</p>
+      <p>Off-season strength &amp; power — Ultimate Frisbee</p>
+    </div>
+    <div class="drawer-item" data-view="today" onclick="go('today')"><span class="dot"></span>This Week</div>
+    <div class="drawer-item" data-view="overview" onclick="go('overview')"><span class="dot"></span>Program Overview</div>
+    <div class="drawer-section-label">Phases</div>
+    <div class="drawer-item" data-view="phase-1" onclick="go('phase-1')"><span class="dot"></span>1 · Foundation</div>
+    <div class="drawer-item" data-view="phase-2" onclick="go('phase-2')"><span class="dot"></span>2 · Max Strength</div>
+    <div class="drawer-item" data-view="phase-3" onclick="go('phase-3')"><span class="dot"></span>3 · Strength-Speed</div>
+    <div class="drawer-item" data-view="phase-4" onclick="go('phase-4')"><span class="dot"></span>4 · Peak Power</div>
+    <div class="drawer-item" data-view="phase-5" onclick="go('phase-5')"><span class="dot"></span>5 · Taper</div>
+    <div class="drawer-section-label">Reference</div>
+    <div class="drawer-item" data-view="warmup" onclick="go('warmup')"><span class="dot"></span>Warm-up</div>
+    <div class="drawer-item" data-view="rules" onclick="go('rules')"><span class="dot"></span>Rules &amp; Notes</div>
+    <div class="drawer-item" data-view="settings" onclick="go('settings')"><span class="dot"></span>Settings</div>
+  </nav>
+
+  <main>
+    <section id="view-today">
+      <div class="card hero-card">
+        <div class="hero-top">
+          <div>
+            <div class="hero-phase-label" id="todayPhaseLabel">Phase</div>
+            <h2 class="hero-phase-name" id="todayPhaseName">—</h2>
+          </div>
+        </div>
+        <div class="hero-week" id="todayWeekBig">—<span id="todayWeekSub"></span></div>
+        <div id="todayBadges"></div>
+        <div class="hero-meta" id="todayMeta"></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" id="tabA" onclick="setDay('A')">Day A</div>
+        <div class="tab" id="tabB" onclick="setDay('B')">Day B</div>
+      </div>
+      <div class="day-focus-line" id="dayFocusLine"></div>
+      <div id="todayExerciseList"></div>
+    </section>
+
+    <section id="view-overview">
+      <h2 class="section-title">Program Overview</h2>
+      <p class="note">Ultimate demands repeated max-effort accel/decel, cutting, and jumping over long points and games. With 2 lifts/week for ~35 weeks, this is a <b>long linear-to-undulating block periodization</b>: build tissue capacity and strength first, then convert it to rate-of-force-development (power), then sharpen reactive qualities as May approaches.</p>
+      <p class="note"><b>Plyometrics</b> are handled entirely in your separate plyo sessions (2x/week) — this program is built to add zero extra jump/bound/landing volume on top of that.</p>
+      <p class="note"><b>Back extension</b> has a fixed weekly slot in Day A every phase given your injury history — it's treated as non-negotiable, not phased out as the program progresses.</p>
+      <table class="overview" id="overviewTable"></table>
+      <p class="note">Every <b>4th week of each phase is a deload</b>: cut sets ~40%, keep intensity. Supersets (A1/A2, B1/B2) mean no pause between the two exercises, rest only after the couplet — except contrast pairs in Phase 3-4, which rest briefly between the two (flagged where they appear).</p>
+    </section>
+
+    <section id="view-phase" data-phase="">
+      <div class="phase-picker" id="phasePicker"></div>
+      <h2 class="section-title" id="phaseTitle">—</h2>
+      <p class="note" id="phaseIntro"></p>
+      <div class="tabs">
+        <div class="tab active" id="pTabA" onclick="setPhaseDay('A')">Day A</div>
+        <div class="tab" id="pTabB" onclick="setPhaseDay('B')">Day B</div>
+      </div>
+      <div id="phaseExerciseList"></div>
+    </section>
+
+    <section id="view-warmup">
+      <h2 class="section-title">Warm-up</h2>
+      <p class="note">Every session, ~8 minutes, before the first main lift.</p>
+      <ol class="warmup-list" id="warmupList"></ol>
+    </section>
+
+    <section id="view-rules">
+      <h2 class="section-title">Rules &amp; Notes</h2>
+      <p class="sub-label">Progression &amp; tracking</p>
+      <ul class="rules" id="rulesList"></ul>
+      <p class="sub-label">Equipment</p>
+      <p class="note" id="equipmentNote"></p>
+    </section>
+
+    <section id="view-settings">
+      <h2 class="section-title">Settings</h2>
+      <div class="field">
+        <label for="startDateInput">Program start date</label>
+        <input type="date" id="startDateInput">
+      </div>
+      <button class="btn" onclick="applyStartDate()">Update</button>
+      <button class="btn ghost" onclick="resetStartDate()" style="margin-left:8px;">Reset to default</button>
+      <p class="settings-note">This resets "This Week" to count from the new date. It only affects this session — reopening the app later will start back from the default date below unless you set it again.</p>
+      <p class="settings-note">Default start date: <b id="defaultDateLabel"></b></p>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+
+const DEFAULT_START = "2026-08-31";
+let startDate = new Date(DEFAULT_START + "T00:00:00");
+
+const videoOverrides = {
+  "Half-Kneeling Landmine Rotation": "https://www.youtube.com/watch?v=3-ySBixjC0M"
+};
+function videoFor(name){
+  if(videoOverrides[name]) return {url:videoOverrides[name], label:"Watch demo"};
+  const q = encodeURIComponent(name.replace(/\(.*?\)/g,'').trim() + " exercise tutorial");
+  return {url:"https://www.youtube.com/results?search_query="+q, label:"Search demo"};
+}
+
+function ex(order,name,sets,rest,notes,contrast){
+  return {order,name,sets,rest,notes:notes||"",contrast:!!contrast};
+}
+
+const phases = [
+  {
+    id:1, key:"phase-1", short:"P1", name:"Foundation", weeks:[1,8], dates:"Aug 31 – Oct 24",
+    focus:"Work capacity, technique, tendon prep", intensity:"Moderate (RPE 6-7)", volume:"High",
+    intro:"Higher volume, moderate intensity. Build tissue capacity and groove technique before loads climb.",
+    days:{
+      A:[
+        ex("A1","Back Squat","4x6","2 min","RPE 6-7, controlled tempo (3s down)"),
+        ex("A2","Band Pallof Press","3x10/side","—","Anti-rotation core, anchor to rack"),
+        ex("B1","Front-Foot-Elevated DB Split Squat","3x8/leg","90s","Build single-leg strength for cutting"),
+        ex("B2","Dead Bug","3x10/side","—","Bodyweight or band-resisted"),
+        ex("C1","Band Lateral Monster Walk","3x15 steps/dir","60s","Frontal-plane hip strength for cuts"),
+        ex("C2","Back Extension","3x10-12","—","Bodyweight or light DB, controlled — fixed weekly slot, injury-history priority"),
+        ex("D1","Pull-ups","3x6-8","60s","Upper body maintenance, leave 1-2 in reserve"),
+        ex("D2","DB Bench Press","3x8-10","—","")
+      ],
+      B:[
+        ex("A1","Barbell Romanian Deadlift","4x6","2 min","Hamstring/hip hinge strength"),
+        ex("A2","Nordic Curl","3x5","—","Band-assisted or partial ROM, hips high — eccentric hamstring strength, high-value for sprint deceleration/injury prevention"),
+        ex("B1","DB Reverse Lunge","3x8/leg","90s",""),
+        ex("B2","Side Plank w/ reach-through","3x8/side","—",""),
+        ex("C1","Copenhagen Plank","3x20-30s/side","60s","Short lever if needed — adductor strength, ACL/groin resilience"),
+        ex("C2","Single-Leg Calf Raise","3x12/leg","—","Controlled, full ROM — ankle/calf strength, relevant to force absorption on cuts"),
+        ex("D1","Band Row","3x10-12","60s","Anchor to rack — upper body maintenance"),
+        ex("D2","DB Overhead Press","3x8-10","—","")
+      ]
+    },
+    footer:"Progression rule: add 2.5–5 lb (or 1 rep) once all sets hit top of rep range with good form."
+  },
+  {
+    id:2, key:"phase-2", short:"P2", name:"Max Strength", weeks:[9,16], dates:"Oct 26 – Dec 19",
+    focus:"Build strength ceiling (squat/hinge/single-leg)", intensity:"High (RPE 7-9)", volume:"Moderate",
+    intro:"Heavier loads, lower reps. This is where your squat, RDL, and single-leg strength ceiling gets built.",
+    days:{
+      A:[
+        ex("A1","Back Squat","5x4","2.5-3 min","RPE 8, heavier"),
+        ex("A2","Half-Kneeling Landmine Rotation","3x8/side","—","Loaded rotation, more specific than band Pallof — direct cutting/pivot carryover"),
+        ex("B1","Bulgarian Split Squat (DB)","4x6/leg","2 min","True single-leg strength"),
+        ex("B2","Weighted Sit-up","3x10","—","On back extension machine"),
+        ex("C1","Back Extension","3x10-12","90s","Add DB weight — fixed weekly slot"),
+        ex("C2","Band Resisted Lateral Step","3x8/side","—","Controlled, no hop — frontal-plane strength, non-impact"),
+        ex("D1","Pull-ups","3x6-8","60s","Add light weight if 8+ is easy"),
+        ex("D2","DB Overhead Press","3x8-10","—","")
+      ],
+      B:[
+        ex("A1","Barbell RDL","5x4","2.5-3 min","RPE 8"),
+        ex("A2","Nordic Curl","3x6-8","—","Full ROM — progress from Phase 1's assisted version"),
+        ex("B1","DB Walking Lunge","3x8/leg","2 min",""),
+        ex("B2","DB Suitcase Carry","3x20-30m/side","—","Single-arm, walk tall — anti-lateral-flexion, a core quality nothing else here trains directly"),
+        ex("C1","Copenhagen Plank","3x20-30s/side","90s","Short lever if needed — adductor strength, instead of a third hamstring-dominant move"),
+        ex("D1","Band Row","3x10-12","60s","Anchor to rack — upper body maintenance"),
+        ex("D2","DB Bench Press","3x8-10","—","")
+      ]
+    },
+    footer:""
+  },
+  {
+    id:3, key:"phase-3", short:"P3", name:"Strength-Speed", weeks:[17,24], dates:"Dec 21 – Feb 13",
+    focus:"Convert strength to speed; dynamic-effort/contrast work", intensity:"Moderate-High, high velocity", volume:"Moderate",
+    intro:"Contrast pairs: a heavy strength move immediately followed by an explosive movement of similar pattern. These rest briefly BETWEEN the two exercises (60-90s) rather than going straight through — that's different from the zero-rest supersets used elsewhere in this program.",
+    days:{
+      A:[
+        ex("A1","Back Squat","4x3 @ RPE8","90s into A2","Contrast pair with A2",true),
+        ex("A2","Speed Squat","5x3","2-3 min","50-60% 1RM, max bar speed, no jump — dynamic-effort power work, trains RFD without landing stress",true),
+        ex("B1","Bulgarian Split Squat (DB), heavy","3x6/leg @ RPE8","2 min into B2","True contrast partner for B2",true),
+        ex("B2","Split Squat, explosive concentric","3x6/leg","2-3 min","Lighter load, same stance, feet stay grounded — explosive analog to B1",true),
+        ex("C1","Landmine 180° Rotational Step","3x5/side","90s","Explosive rotation, mimics pivot/cut off the disc"),
+        ex("C2","Back Extension","3x10-12","—","Add DB weight — fixed weekly slot"),
+        ex("D1","Pull-ups","3x5-6","60s","Explosive pull, controlled descent — trimmed volume, legs/CNS are the priority"),
+        ex("D2","DB Bench Press","2x8","—","")
+      ],
+      B:[
+        ex("A1","Barbell RDL","4x3 @ RPE8","90s into A2","Contrast pair with A2",true),
+        ex("A2","Back Extension, fast concentric/explosive","4x8","2-3 min","Explosive analog to the RDL without ground-impact — also satisfies weekly back extension work",true),
+        ex("B1","Nordic Curl, explosive catch","3x6","90s","Controlled fall — fast eccentric control + push back to start, power-oriented hamstring work"),
+        ex("B2","Single-Leg Hip Thrust","3x6/side","—","Banded, explosive top — glute-dominant hip extension, unilateral, different pattern than the A1/A2 pair"),
+        ex("C1","Weighted Sit-up, fast concentric","3x10","60s",""),
+        ex("D1","Band Row","2x10-12","60s","Anchor to rack — trimmed volume, legs/CNS are the priority"),
+        ex("D2","DB Overhead Press","2x8","—","")
+      ]
+    },
+    footer:""
+  },
+  {
+    id:4, key:"phase-4", short:"P4", name:"Peak Power", weeks:[25,32], dates:"Feb 15 – Apr 10",
+    focus:"Max power, reactive elasticity, COD-specific", intensity:"Low-Moderate load, max intent", volume:"Low-Moderate",
+    intro:"Loads come down, intent and quality go up on the barbell speed work. Reactive/elastic plyo work itself stays in your dedicated plyo sessions — this phase keeps the strength/RFD underneath that plyo work sharp. A1/A2 pairs are contrast pairs (rest between the two, not zero — see Phase 3 note).",
+    days:{
+      A:[
+        ex("A1","Back Squat","3x3 @ RPE7 (maintenance)","2 min into A2","Contrast pair with A2",true),
+        ex("A2","Speed Squat","4x3","2-3 min","40-50% 1RM, max bar speed — maintain RFD without adding to weekly impact load",true),
+        ex("B1","Band Resisted Lateral Step","3x6/side","90s","Fast, controlled"),
+        ex("B2","Landmine Rotational Lunge","2x6/side","—","Loaded rotational lunge — direct cutting specificity, low volume this phase"),
+        ex("C1","Back Extension","2x10-12","60s","Moderate weight, controlled — fixed weekly slot"),
+        ex("D1","Pull-ups","2x5-6","60s","True maintenance dose")
+      ],
+      B:[
+        ex("A1","Barbell RDL","3x3 @ RPE7","2 min into A2","Contrast pair with A2",true),
+        ex("A2","Speed RDL","4x3","2-3 min","40-50% 1RM, max hip-drive speed, no jump — same hip-hinge pattern as A1, maintains RFD without impact",true),
+        ex("B1","Speed Split Squat","3x4/leg","90s","Light DB, fast concentric, grounded"),
+        ex("B2","Single-Leg Hip Thrust","3x6/side","—","Banded, explosive top — unilateral hip power, non-impact"),
+        ex("C1","Nordic Curl","2x5","60s","Bodyweight, controlled — maintenance dose, quality over volume"),
+        ex("C2","DB Suitcase Carry","2x20-30m/side","—","Single-arm, walk tall — Day A already covers rotation via the landmine lunge, this trains a different core quality"),
+        ex("D1","DB Overhead Press","2x8","60s","True maintenance dose")
+      ]
+    },
+    footer:""
+  },
+  {
+    id:5, key:"phase-5", short:"P5", name:"Taper", weeks:[33,35], dates:"Apr 12 – May 1",
+    focus:"Maintain power/strength, freshen up for tryouts/season", intensity:"Low volume, touches of intensity", volume:"Low",
+    intro:"Cut total sets ~50%. Keep 1-2 sets of near-max squat/RDL to hold strength, 1-2 sets of speed squat for CNS readiness, and a light touch of back extension (stays weekly, just lower volume). Drop everything else — including Nordic curls and landmine work. Upper body: one easy set of pull-ups, not to failure. Coordinate with your plyo sessions here too — total volume across both programs should be trending down. Goal: walk into May fresh, strong, and springy.",
+    days:{
+      A:[
+        ex("A1","Back Squat","1-2x3 @ RPE6-7","2 min","Near-max feel, not a grind"),
+        ex("A2","Speed Squat","2x3","2 min","Light, crisp, CNS touch"),
+        ex("B1","Back Extension","1-2x10","—","Light — weekly slot stays, volume way down"),
+        ex("C1","Pull-ups","1x AMRAP-2","—","Easy set, not to failure")
+      ],
+      B:[
+        ex("A1","Barbell RDL","1-2x3 @ RPE6-7","2 min","Near-max feel, not a grind"),
+        ex("A2","Speed RDL","2x3","2 min","Light, crisp, CNS touch"),
+        ex("B1","Nordic Curl","1x5","—","Optional light touch if it feels good — otherwise skip this week")
+      ]
+    },
+    footer:"This phase is intentionally sparse — resist the urge to add volume back in."
+  }
+];
+
+const warmupSteps = [
+  "5 min easy bike/row/skip rope or general pulse-raiser",
+  "Band monster walks — 2x10 steps/direction",
+  "Bodyweight RDL to reverse lunge — x6/side",
+  "Ankle rocks + hip 90/90 rotations — x5/side",
+  "2 sets ramping into first main lift"
+];
+
+const rules = [
+  {b:"Phase 1-2:", t:"progress load when all prescribed reps hit with 1-2 reps in reserve."},
+  {b:"Phase 3-4:", t:"progress the speed squat/speed RDL/speed split squat work by bar speed and movement quality, not load — these stay submaximal by design (roughly 40-60% 1RM). Don't creep the weight up over time or you defeat the purpose."},
+  {b:"Contrast pairs (Phase 3-4):", t:"use a short rest BETWEEN the heavy and explosive exercise, unlike the zero-rest supersets elsewhere in the program."},
+  {b:"Back extension:", t:"a fixed weekly slot in Day A (plus an extra explosive variant in Phase 3 Day B) for the whole 35 weeks. Don't drop it even during busy weeks — keep it moderate, this isn't the exercise to chase heavy loads on."},
+  {b:"Total impact management:", t:"since plyos live in your separate sessions, this program adds zero extra jump/bound/landing volume. If a week feels like too much combined pounding, trim a set here before cutting plyo volume there."},
+  {b:"Deload weeks:", t:"every 4th week in a phase — same exercises, ~40% less volume, same or slightly lower intensity."},
+  {b:"Autoregulate around practice/tournaments:", t:"if legs are trashed from field sessions, drop a set or two rather than skipping the session — consistency across 35 weeks matters more than any single session's numbers."},
+  {b:"Band/back-extension:", t:"anchor bands to the squat rack uprights at low/mid height for lateral and rotational work. On the back extension, control the eccentric (3s) — that's where most of the protective adaptation happens."},
+  {b:"Nordic curl:", t:"if full ROM is too much early on, use band assistance or stop the descent partway. The eccentric portion is where the injury-prevention benefit comes from — introduce it conservatively in Phase 1, soreness can be significant."},
+  {b:"Landmine:", t:"rotational movements should be driven by hip/trunk rotation, not just arm swing. Keep reps controlled and full-range in Phase 2, then let intent/speed increase in Phase 3-4."}
+];
+
+const equipmentText = "Squat rack + barbell (with pull-up bar), dumbbells, bench, resistance bands, back extension (glute-ham/hyper) machine, Nordic curl machine, landmine attachment.";
+
+/* ---------------- STATE ---------------- */
+let currentDayToday = 'A';
+let currentPhaseKey = 'phase-1';
+let currentPhaseDay = 'A';
+
+/* ---------------- NAV ---------------- */
+function openMenu(){document.getElementById('drawer').classList.add('open');document.getElementById('backdrop').classList.add('open');}
+function closeMenu(){document.getElementById('drawer').classList.remove('open');document.getElementById('backdrop').classList.remove('open');}
+
+function go(view){
+  closeMenu();
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.drawer-item').forEach(d=>d.classList.remove('active'));
+  const item = document.querySelector('.drawer-item[data-view="'+view+'"]');
+  if(item) item.classList.add('active');
+
+  if(view.startsWith('phase-')){
+    currentPhaseKey = view;
+    document.getElementById('view-phase').classList.add('active');
+    renderPhaseView();
+  } else {
+    document.getElementById('view-'+view).classList.add('active');
+    if(view==='today') renderToday();
+    if(view==='overview') renderOverview();
+    if(view==='warmup') renderWarmup();
+    if(view==='rules') renderRules();
+    if(view==='settings') renderSettings();
+  }
+}
+
+/* ---------------- WEEK CALC ---------------- */
+function getWeekInfo(){
+  const now = new Date();
+  const today0 = new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const start0 = new Date(startDate.getFullYear(),startDate.getMonth(),startDate.getDate());
+  const diffDays = Math.floor((today0-start0)/(1000*60*60*24));
+  const weekNum = Math.floor(diffDays/7)+1;
+  return {weekNum, diffDays};
+}
+function findPhaseForWeek(weekNum){
+  for(const p of phases){ if(weekNum>=p.weeks[0] && weekNum<=p.weeks[1]) return p; }
+  return null;
+}
+function isDeloadWeek(phase, weekNum){
+  const rel = weekNum - phase.weeks[0] + 1;
+  const len = phase.weeks[1]-phase.weeks[0]+1;
+  if(len < 4) return false;
+  return rel % 4 === 0;
+}
+
+/* ---------------- EXERCISE RENDER ---------------- */
+function exerciseCardHTML(e, idx, prefix){
+  const v = videoFor(e.name);
+  const contrastBadge = e.contrast ? '<span class="badge contrast" style="margin:0 0 0 8px;">Contrast</span>' : '';
+  return `
+  <div class="exercise" id="${prefix}-ex-${idx}">
+    <div class="exercise-head" onclick="toggleExercise('${prefix}-ex-${idx}')">
+      <div class="order-chip">${e.order}</div>
+      <div class="exercise-name">${e.name}${contrastBadge}</div>
+      <div class="exercise-setsreps">${e.sets}</div>
+      <div class="chevron"></div>
+    </div>
+    <div class="exercise-body">
+      <div class="exercise-body-inner">
+        <div class="detail-row"><div class="detail-label">Rest</div><div class="detail-value">${e.rest}</div></div>
+        ${e.notes ? `<div class="detail-row"><div class="detail-label">Notes</div><div class="detail-value">${e.notes}</div></div>` : ''}
+        <a class="video-link" href="${v.url}" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>${v.label}
+        </a>
+      </div>
+    </div>
+  </div>`;
+}
+function toggleExercise(id){
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ---------------- TODAY VIEW ---------------- */
+function renderToday(){
+  const {weekNum} = getWeekInfo();
+  const phase = findPhaseForWeek(weekNum);
+  const pill = document.getElementById('weekPill');
+
+  if(!phase){
+    if(weekNum < 1){
+      pill.textContent = 'Not started';
+      document.getElementById('todayPhaseLabel').textContent = 'Program has not started yet';
+      document.getElementById('todayPhaseName').textContent = 'Starts ' + startDate.toDateString().slice(4);
+      document.getElementById('todayWeekBig').innerHTML = '—';
+      document.getElementById('todayBadges').innerHTML='';
+      document.getElementById('todayMeta').textContent = '';
+      document.getElementById('todayExerciseList').innerHTML='';
+      document.getElementById('dayFocusLine').textContent='';
+      return;
+    } else {
+      pill.textContent = 'Season time';
+      document.getElementById('todayPhaseLabel').textContent = 'Off-season complete';
+      document.getElementById('todayPhaseName').textContent = 'Season has started 🥏';
+      document.getElementById('todayWeekBig').innerHTML = '—';
+      document.getElementById('todayBadges').innerHTML='';
+      document.getElementById('todayMeta').textContent = 'Switch to your in-season template.';
+      document.getElementById('todayExerciseList').innerHTML='';
+      document.getElementById('dayFocusLine').textContent='';
+      return;
+    }
+  }
+
+  const rel = weekNum - phase.weeks[0] + 1;
+  const len = phase.weeks[1]-phase.weeks[0]+1;
+  const deload = isDeloadWeek(phase, weekNum);
+
+  pill.textContent = 'Week ' + weekNum + ' / 35';
+  document.getElementById('todayPhaseLabel').textContent = 'Phase ' + phase.id + ' of 5';
+  document.getElementById('todayPhaseName').textContent = phase.name;
+  document.getElementById('todayWeekBig').innerHTML = rel + '<span> / ' + len + ' this phase</span>';
+
+  let badges = `<span class="badge fixed">${phase.dates}</span>`;
+  if(deload) badges += ` <span class="badge deload">Deload week</span>`;
+  document.getElementById('todayBadges').innerHTML = badges;
+  document.getElementById('todayMeta').textContent = phase.focus + ' · ' + phase.intensity + ' · ' + phase.volume + ' volume' + (deload ? ' (cut ~40% this week)' : '');
+
+  document.getElementById('tabA').classList.toggle('active', currentDayToday==='A');
+  document.getElementById('tabB').classList.toggle('active', currentDayToday==='B');
+  document.getElementById('dayFocusLine').textContent = phase.intro;
+
+  const list = phase.days[currentDayToday].map((e,i)=>exerciseCardHTML(e,i,'today')).join('');
+  document.getElementById('todayExerciseList').innerHTML = list;
+}
+function setDay(d){ currentDayToday = d; renderToday(); }
+
+/* ---------------- OVERVIEW VIEW ---------------- */
+function renderOverview(){
+  const {weekNum} = getWeekInfo();
+  const rows = phases.map(p=>{
+    const isCurrent = weekNum>=p.weeks[0] && weekNum<=p.weeks[1];
+    return `<tr class="${isCurrent?'current':''}">
+      <td class="ph">${p.id}. ${p.name}</td>
+      <td>${p.weeks[0]}–${p.weeks[1]}</td>
+      <td>${p.dates}</td>
+      <td>${p.focus}</td>
+      <td>${p.volume}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('overviewTable').innerHTML = `
+    <tr><th>Phase</th><th>Weeks</th><th>Dates</th><th>Focus</th><th>Vol</th></tr>${rows}`;
+}
+
+/* ---------------- PHASE BROWSE VIEW ---------------- */
+function renderPhaseView(){
+  const picker = phases.map(p=>`<div class="phase-chip ${p.key===currentPhaseKey?'active':''}" onclick="selectPhase('${p.key}')">${p.short}</div>`).join('');
+  document.getElementById('phasePicker').innerHTML = picker;
+  const phase = phases.find(p=>p.key===currentPhaseKey);
+  document.getElementById('phaseTitle').textContent = 'Phase ' + phase.id + ' — ' + phase.name;
+  document.getElementById('phaseIntro').textContent = phase.intro + (phase.footer ? ' ' + phase.footer : '');
+  document.getElementById('pTabA').classList.toggle('active', currentPhaseDay==='A');
+  document.getElementById('pTabB').classList.toggle('active', currentPhaseDay==='B');
+  const list = phase.days[currentPhaseDay].map((e,i)=>exerciseCardHTML(e,i,'phase')).join('');
+  document.getElementById('phaseExerciseList').innerHTML = list;
+}
+function selectPhase(key){ currentPhaseKey = key; renderPhaseView();
+  document.querySelectorAll('.drawer-item').forEach(d=>d.classList.remove('active'));
+  const item = document.querySelector('.drawer-item[data-view="'+key+'"]');
+  if(item) item.classList.add('active');
+}
+function setPhaseDay(d){ currentPhaseDay = d; renderPhaseView(); }
+
+/* ---------------- WARMUP / RULES / SETTINGS ---------------- */
+function renderWarmup(){
+  document.getElementById('warmupList').innerHTML = warmupSteps.map(s=>`<li>${s}</li>`).join('');
+}
+function renderRules(){
+  document.getElementById('rulesList').innerHTML = rules.map(r=>`<li><b>${r.b}</b> ${r.t}</li>`).join('');
+  document.getElementById('equipmentNote').textContent = equipmentText;
+}
+function renderSettings(){
+  document.getElementById('startDateInput').value = startDate.toISOString().slice(0,10);
+  document.getElementById('defaultDateLabel').textContent = new Date(DEFAULT_START+"T00:00:00").toDateString().slice(4);
+}
+function applyStartDate(){
+  const v = document.getElementById('startDateInput').value;
+  if(!v) return;
+  startDate = new Date(v+"T00:00:00");
+  go('today');
+}
+function resetStartDate(){
+  startDate = new Date(DEFAULT_START + "T00:00:00");
+  renderSettings();
+  go('today');
+}
+
+/* ---------------- INIT ---------------- */
+document.querySelector('.drawer-item[data-view="today"]').classList.add('active');
+renderToday();
+document.getElementById('view-today').classList.add('active');
+</script>
+</body>
+</html>
